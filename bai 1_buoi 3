@@ -1,7 +1,3 @@
-//Viết chương trình kiểm tra hợp lệ của cặp dấu ngoặc (), [], {} trong một chuỗi nhập vào.
-//Bằng C++ sao cho phù hợp với visual studio 2022
-//Tự tạo cấu trúc stack 
-
 #include <iostream>
 #include <string>
 using namespace std;
@@ -103,22 +99,22 @@ bool CheckValid(Stack st, string s)
     return false;
 }
 
-//Kiểm tra bất kì dấu ngoặc trùng lặp (dư thừa) trong biểu thức
-//Ví dụ: (a+b)*c+(d-e) có dấu ngoặc dư thừa là (d-e)
 bool CheckValid2(Stack st, string s)
 {
     for (int i = 0; i < s.length(); i++)
     {
-        if (s[i] == '(' || s[i] == '[' || s[i] == '{')
+        if (s[i] != ')')
             Push(st, s[i]);
-        else if (s[i] == ')' || s[i] == ']' || s[i] == '}')
+        else
         {
-            if (IsEmpty(st))
+            if (Top(st) == '(')
                 return false;
-            else if (Check(Top(st), s[i]))
-                Pop(st);
             else
-                return false;
+            {
+                while (Top(st) != '(')
+                    Pop(st);
+                Pop(st);
+            }
         }
     }
     if (IsEmpty(st))
@@ -137,7 +133,7 @@ void Menu(Stack& st)
     {
         cout << "\n-------------------------------------------------" << endl;
         cout << "1. Kiem tra hop le cua cap dau ngoac" << endl;
-        cout << "2. Kiem tra dau ngoac du thua" << endl;
+        cout << "2. Kiem tra dau ngoac don du thua" << endl;
         cout << "0. Thoat!" << endl;
         cout << "-------------------------------------------------" << endl;
 
