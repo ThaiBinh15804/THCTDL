@@ -1,0 +1,119 @@
+//Viết chương trình kiểm tra hợp lệ của cặp dấu ngoặc (), [], {} trong một chuỗi nhập vào.
+//Bằng C++ sao cho phù hợp với visual studio 2022
+//Tự tạo cấu trúc stack 
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Node
+{
+    char data;
+    Node* next;
+};
+
+struct Stack
+{
+    Node* top;
+};
+
+void Init(Stack& s)
+{
+    s.top = NULL;
+}
+
+Node* CreateNode(char x)
+{
+    Node* p = new Node;
+    if (p == NULL)
+        return NULL;
+    p->data = x;
+    p->next = NULL;
+    return p;
+}
+
+bool IsEmpty(Stack s)
+{
+    if (s.top == NULL)
+        return true;
+    return false;
+}
+
+void Push(Stack& s, char x)
+{
+    Node* p = CreateNode(x);
+    if (p == NULL)
+        return;
+    if (IsEmpty(s))
+        s.top = p;
+    else
+    {
+        p->next = s.top;
+        s.top = p;
+    }
+}
+
+char Pop(Stack& s)
+{
+    if (IsEmpty(s))
+        return NULL;
+    Node* p = s.top;
+    char x = p->data;
+    s.top = s.top->next;
+    delete p;
+    return x;
+}
+
+char Top(Stack s)
+{
+    if (IsEmpty(s))
+        return NULL;
+    return s.top->data;
+}
+
+bool Check(char x, char y)
+{
+    if (x == '(' && y == ')')
+        return true;
+    if (x == '[' && y == ']')
+        return true;
+    if (x == '{' && y == '}')
+        return true;
+    return false;
+}
+
+bool CheckValid(string s)
+{
+    Stack st;
+    Init(st);
+    for (int i = 0; i < s.length(); i++)
+    {
+        if (s[i] == '(' || s[i] == '[' || s[i] == '{')
+            Push(st, s[i]);
+        else if (s[i] == ')' || s[i] == ']' || s[i] == '}')
+        {
+            if (IsEmpty(st))
+                return false;
+            else if (Check(Top(st), s[i]))
+                Pop(st);
+            else
+                return false;
+        }
+    }
+    
+    if (IsEmpty(st))
+        return true;
+    return false;
+}
+
+int main()
+{
+    string s;
+    cout << "Nhap chuoi: ";
+    getline(cin, s);
+    if (CheckValid(s))
+        cout << "Hop le";
+    else
+        cout << "Khong hop le";
+    return 0;
+}
