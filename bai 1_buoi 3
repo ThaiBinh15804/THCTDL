@@ -82,10 +82,8 @@ bool Check(char x, char y)
     return false;
 }
 
-bool CheckValid(string s)
+bool CheckValid(Stack st, string s)
 {
-    Stack st;
-    Init(st);
     for (int i = 0; i < s.length(); i++)
     {
         if (s[i] == '(' || s[i] == '[' || s[i] == '{')
@@ -100,20 +98,81 @@ bool CheckValid(string s)
                 return false;
         }
     }
-    
     if (IsEmpty(st))
         return true;
     return false;
 }
 
-int main()
+//Kiểm tra bất kì dấu ngoặc trùng lặp (dư thừa) trong biểu thức
+//Ví dụ: (a+b)*c+(d-e) có dấu ngoặc dư thừa là (d-e)
+bool CheckValid2(Stack st, string s)
+{
+    for (int i = 0; i < s.length(); i++)
+    {
+        if (s[i] == '(' || s[i] == '[' || s[i] == '{')
+            Push(st, s[i]);
+        else if (s[i] == ')' || s[i] == ']' || s[i] == '}')
+        {
+            if (IsEmpty(st))
+                return false;
+            else if (Check(Top(st), s[i]))
+                Pop(st);
+            else
+                return false;
+        }
+    }
+    if (IsEmpty(st))
+        return true;
+    return false;
+}
+
+//Hàm menu với 2 chức năng trên
+void Menu(Stack& st)
 {
     string s;
     cout << "Nhap chuoi: ";
     getline(cin, s);
-    if (CheckValid(s))
-        cout << "Hop le";
-    else
-        cout << "Khong hop le";
+
+    while (1 != 0)
+    {
+        cout << "\n-------------------------------------------------" << endl;
+        cout << "1. Kiem tra hop le cua cap dau ngoac" << endl;
+        cout << "2. Kiem tra dau ngoac du thua" << endl;
+        cout << "0. Thoat!" << endl;
+        cout << "-------------------------------------------------" << endl;
+
+        cout << "\nVui long nhap lua chon: ";
+        int choice;
+        cin >> choice;
+
+        switch (choice)
+        {
+        case 1:
+            if (CheckValid(st, s))
+                cout << "Hop le\n";
+            else
+                cout << "Khong hop le\n";
+            break;
+        case 2:
+            if (CheckValid2(st, s))
+                cout << "Hop le\n";
+            else
+                cout << "Khong hop le\n";
+            break;
+        case 0: return;
+            break;
+        default:
+            cout << "Lua chon khong hop le\n";
+            break;
+        }
+    }
+}
+
+
+int main()
+{
+    Stack st;
+    Init(st);
+    Menu(st);
     return 0;
 }
