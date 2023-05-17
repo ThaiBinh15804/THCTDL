@@ -1,3 +1,7 @@
+//Viết chương trình kiểm tra hợp lệ của cặp dấu ngoặc (), [], {} trong một chuỗi nhập vào.
+//Bằng C++ sao cho phù hợp với visual studio 2022
+//Tự tạo cấu trúc stack 
+
 #include <iostream>
 #include <string>
 using namespace std;
@@ -101,13 +105,14 @@ bool CheckValid(Stack st, string s)
 
 bool CheckValid2(Stack st, string s)
 {
+    
     for (int i = 0; i < s.length(); i++)
     {
-        if (s[i] != ')')
-            Push(st, s[i]);
-        else
+        if (s[i] == ')')
         {
-            if (Top(st) == '(')
+            if (IsEmpty(st))
+                return false;
+            else if (Top(st) == '(')
                 return false;
             else
             {
@@ -116,9 +121,23 @@ bool CheckValid2(Stack st, string s)
                 Pop(st);
             }
         }
+        else
+        {
+            Push(st, s[i]);
+        }
+
     }
+    
+    while (!IsEmpty(st))
+    {
+        if (Pop(st) == '(')
+            return false;
+    }
+
     if (IsEmpty(st))
         return true;
+
+
     return false;
 }
 
