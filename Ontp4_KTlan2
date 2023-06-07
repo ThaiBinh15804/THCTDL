@@ -1,0 +1,479 @@
+#include<stdio.h>
+#include<conio.h>
+#include<math.h>
+#include<stdlib.h>
+#include<string.h>
+
+struct Quanao
+{
+    char ma[10];
+    char ten[20];
+    int khuyenmai;
+    float dongia;
+    int soluong;
+    int size;
+};
+typedef Quanao value;
+
+struct Node 
+{
+    value data;
+    Node *left;
+    Node *right;
+};
+
+struct Tree
+{
+    Node *root;
+};
+
+void Init(Tree &t)
+{
+    t.root = NULL;
+}
+
+Node *createNode(value x)
+{
+    Node *p = new Node;
+    if (p == NULL)
+        return NULL;
+    p->data = x;
+    p->left = NULL;
+    p->right = NULL;
+
+    return p;
+}
+
+void addNode(Node *&root, Node *p)
+{
+    if (p == NULL)
+        return;
+    if (root == NULL)
+    {
+        root = p;
+        return;
+    }
+    else
+    {
+        if (root->data.dongia > p->data.dongia)
+            addNode(root->left, p);
+        else if (root->data.dongia < p->data.dongia)
+            addNode(root->right, p);
+    }   
+}
+
+Node *findNode_replace(Node *p)
+{
+    Node *f = p;
+    Node *q = p->right;
+    while (q->left != NULL)
+    {
+        f = q;
+        q = q->left;
+    }
+    p->data = q->data;
+    if (f == p)
+        f->right = q->right;
+    else
+        f->left = q->right;
+    
+    return q;
+}
+
+void deleteNode(Node *&root, value x)
+{
+    if (root == NULL)
+        return;
+    
+    if (root->data.dongia == x.dongia)
+    {
+        Node *p = root;
+        if (root->left == NULL)
+            root = root->right;
+        else if (root->right == NULL)
+            root = root->left;
+        else    
+            p = findNode_replace(p);
+
+        delete p;
+        return;
+    }
+    
+    if (root->data.dongia > x.dongia)
+        deleteNode(root->left, x);
+    else
+        deleteNode(root->right, x);
+}
+
+void Nhap(value &x)
+{
+    printf("\nNhap vao ma quan ao: ");
+    scanf_s("%s", x.ma);
+    printf("\nNhap vao ten quan ao: ");
+    scanf_s("%s", x.ten);
+    printf("\nNhap vao khuyen mai: ");
+    scanf_s("%d", &x.khuyenmai);
+    printf("\nNhap vao don gia: ");
+    scanf_s("%f", &x.dongia);
+    printf("\nNhap vao so luong: ");
+    scanf_s("%d", &x.soluong);
+    printf("\nNhap vao size: ");
+    scanf_s("%d", &x.size);
+}
+
+void Xuat(value x)
+{
+    printf("\n%-15s %-20s %-15d %-25.2f %-15d %-15d", x.ma, x.ten, x.khuyenmai, x.dongia, x.soluong, x.size);
+}
+
+void Nhap_Tree(Tree &t)
+{
+    int n;
+    printf("\nNhap so luong muon them: ");
+    scanf_s("%d", &n);
+
+    for (int i = 1; i <= n; i ++)
+    {
+        value x;
+        printf("\n---------- Nhap vao thong tin quan ao thu %d ----------", i);
+        Nhap(x);
+
+        Node *p = createNode(x);
+        addNode(t.root, p);
+    }
+}
+
+void Xuat_Tree(Node *root)
+{
+    if (root == NULL)
+        return;
+    Xuat(root->data);
+    Xuat_Tree(root->left);
+    Xuat_Tree(root->right);
+}
+
+int Ktra_Size_Dongia(value x, int size, float dongia)
+{
+    if (x.size > size && x.dongia > dongia)
+        return 1;
+    return 0;
+}
+
+void In_Tree_Size_Dongia(Node *root, int size, int dongia)
+{
+    if(root == NULL)
+        return;
+    
+    if (Ktra_Size_Dongia(root->data, size, dongia) == 1)
+        Xuat(root->data);
+    In_Tree_Size_Dongia(root->left, size, dongia);
+    In_Tree_Size_Dongia(root->right, size, dongia);
+}
+
+Node *findMin_dongia(Tree t)
+{
+    Node *min = t.root;
+    Node *p = t.root;
+    while (p != NULL)
+    {
+        if (p->data.dongia < min->data.dongia)
+            min = p;
+        p = p->left;
+    }
+
+    return min;
+}
+float tien_KM(value x)
+{
+    return x.dongia * x.khuyenmai /100;
+}
+
+float tongTien_dongia_real(Node *root)
+{
+    if (root == NULL)
+        return 0;
+    
+    value x = root->data;
+    x.dongia = (x.dongia - tien_KM(x))* x.soluong;
+
+    return x.dongia + tongTien_dongia_real(root->left) + tongTien_dongia_real(root->right); 
+}
+
+void In_Tree_dongia_real(Node *root)
+{
+    if (root == NULL)
+        return;
+    
+    value x = root->data;
+    x.dongia = x.dongia - tien_KM(x);
+    Xuat(x);
+    In_Tree_dongia_real(root->left);
+    In_Tree_dongia_real(root->right);
+}
+
+float tongTien_KM(value x)
+{
+    return tien_KM(x) * x.soluong;
+}
+
+void In_Tree_tongTien_KM(Node *root)
+{
+    if (root == NULL)
+        return;
+
+    printf("\n%-15s %-20s %-15d %-25.2f %-15d %-25.2f", root->data.ma, root->data.ten, 
+        root->data.khuyenmai, root->data.dongia, root->data.soluong, tongTien_KM(root->data));
+    In_Tree_tongTien_KM(root->left);
+    In_Tree_tongTien_KM(root->right);
+}
+
+int Height_Root(Node *root)
+{
+    if (root == NULL)
+        return 0;
+    
+    int left = Height_Root(root->left);
+    int right = Height_Root(root->right);
+
+    if (left > right)
+        return left + 1;
+    else
+        return right + 1;
+}
+
+void In_Tree_height_size_x(Node *root, int x)
+{
+    if (root == NULL)
+        return;
+    if (root->data.size > x)
+        printf("\n%-15s %-20s %-15d %-25.2f %-15d %-10d", root->data.ma, root->data.ten, 
+            root->data.khuyenmai, root->data.dongia, root->data.soluong, Height_Root(root));
+    
+    In_Tree_height_size_x(root->left, x);
+    In_Tree_height_size_x(root->right, x);
+}
+
+int Cout_Quanao_least_1con_size_bigger_x(Node *root, int x)
+{
+    if (root == NULL)
+        return 0;
+    
+    if (root->left != NULL && root->left->data.size > 10)
+        return 1 + Cout_Quanao_least_1con_size_bigger_x(root->left, x)+ Cout_Quanao_least_1con_size_bigger_x(root->right, x);
+    else if (root->right != NULL && root->right->data.size > 10)
+        return 1 + Cout_Quanao_least_1con_size_bigger_x(root->left, x)+ Cout_Quanao_least_1con_size_bigger_x(root->right, x);
+    else
+        return Cout_Quanao_least_1con_size_bigger_x(root->left, x)+ Cout_Quanao_least_1con_size_bigger_x(root->right, x);
+
+}
+
+void In_Node_muc_k(Node *root, int k, int i)
+{
+    if (root == NULL)
+        return;
+    
+    In_Node_muc_k(root->left, k, i+1);
+    In_Node_muc_k(root->right, k, i+1);
+    if (i == k)
+        Xuat(root->data);
+}
+
+void deleteNode_ten(Node *&root, char ten[], int &ktra)
+{
+    if (root == NULL)
+        return;
+
+    deleteNode_ten(root->left, ten, ktra);
+    deleteNode_ten(root->right, ten, ktra);
+    if (strcmp(root->data.ten, ten) == 0)
+    {
+        deleteNode(root, root->data);
+        ktra = 1;
+    }
+}
+
+void giamGia_Node_soluong_bigger_x(Node *&root, int x)
+{
+    if (root == NULL)
+        return;
+    
+    if (root->data.soluong > 30)
+    {
+        if (root->data.khuyenmai > 0)
+        {
+            printf("\n\n-------------------- Thong tin san pham --------------------");
+            printf("\n%-15s %-20s %-15s %-25s %-15s %-15s", "Ma quan ao", "Ten quan ao", "Khuyen mai", "Don gia", "So luong", "Size");
+            Xuat(root->data);
+            printf("\n\nBan co muon thay doi khuyen mai?");
+            printf("\n1. Co");
+            printf("\n0. Khong");
+
+            int lc;
+            printf("\nVui long nhap lua chon: ");
+            scanf("%d", &lc);
+            switch (lc)
+            {
+            case 1:
+            {
+                int KM;
+                printf("\nNhap vao khuyen mai moi: ");
+                scanf("%d", &KM);
+                root->data.khuyenmai = KM;
+                break;
+            }
+            case 0: 
+                break;
+            default: 
+            {
+                printf("\nLua chon khong hop le!");
+                _getch();
+            }
+                break;
+            }
+        }
+    }
+    giamGia_Node_soluong_bigger_x(root->left, x);
+    giamGia_Node_soluong_bigger_x(root->right, x);
+}
+
+void MENU(Tree &t)
+{
+    while (1!=0)
+    {
+        system("cls");
+        printf("\n\n----------- MENU -----------\n");
+        printf("\n   1.  Nhap thong tin");
+        printf("\n   2.  Xuat thong tin");
+        printf("\n   3.  In quan ao co size tren 32 va don gia tren 100K");
+        printf("\n   4.  Quan ao co gia ban thap nhat");
+        printf("\n   5.  Tong tien quan ao ton kho theo don gia thuc te da tru khuyen mai");
+        printf("\n   6.  In tat ca quan ao co gia ban thuc te sau khi tru khuyen mai");
+        printf("\n   7.  In tong tien giam gia cua quan ao");;
+        printf("\n   8.  Do cao cay voi node goc la node dang xet co size lon hon 10");
+        printf("\n   9.  Dem so quan ao co it nhat 1 con va size 1 con lon hon 10");
+        printf("\n   10. In quan ao o muc k");
+        printf("\n   11. Xoa quan ao co ten theo yeu cau");
+        printf("\n   12. Khuyen mai moi cho hang ton kho co so luong lon hon 30");
+        printf("\n   0.  ");
+        printf("\n\n----------- END -----------\n");
+
+        int lc;
+        printf("\nNhap vao lua chon: ");
+        scanf_s("%d", &lc);
+        switch (lc)
+        {
+        case 1:
+        {
+            Nhap_Tree(t);
+            break;
+        }
+        case 2:
+        {
+            printf("\n%-15s %-20s %-15s %-25s %-15s %-15s", "Ma quan ao", "Ten quan ao", "Khuyen mai", "Don gia", "So luong", "Size");
+            Xuat_Tree(t.root);
+            _getch();
+            break;
+        }
+        case 3:
+        {
+            printf("\n---------- Thong tin quan ao co size lon hon 32 va don gia lon hon 100K ----------\n");
+            printf("\n%-15s %-20s %-15s %-25s %-15s %-15s", "Ma quan ao", "Ten quan ao", "Khuyen mai", "Don gia", "So luong", "Size");
+            In_Tree_Size_Dongia(t.root, 32, 100000);
+            _getch();
+            break;
+        }
+        case 4:
+        {
+            printf("\n---------- Thong tin quan ao co don gia nhon nhat ----------\n");
+            printf("\n%-15s %-20s %-15s %-25s %-15s %-15s", "Ma quan ao", "Ten quan ao", "Khuyen mai", "Don gia", "So luong", "Size");
+            Xuat(findMin_dongia(t)->data);
+            _getch();
+            break;
+        }
+        case 5:
+        {
+            printf("\n\nTong tien quan ao ton kho sau khi tru khuyen mai: %.2f", tongTien_dongia_real(t.root));
+            _getch();
+            break;
+        }
+        case 6:
+        {
+            printf("\n---------- Thong tin quan ao co don gia thuc te ----------\n");
+            printf("\n%-15s %-20s %-15s %-25s %-15s %-15s", "Ma quan ao", "Ten quan ao", "Khuyen mai", "Don gia", "So luong", "Size");
+            In_Tree_dongia_real(t.root);
+            _getch();
+            break;
+        }
+        case 7:
+        {
+            printf("\n---------- Thong tin quan ao va tong tien giam gia ----------\n");
+            printf("\n%-15s %-20s %-15s %-25s %-15s %-25s", "Ma quan ao", "Ten quan ao", "Khuyen mai", "Don gia", "So luong", "Tong tien giam gia");
+            In_Tree_tongTien_KM(t.root);
+            _getch();
+            break;
+        }
+        case 8:
+        {
+            printf("\n---------- Thong tin quan ao va chieu cao tai node dang xet co size lon hon 10 ----------\n");
+            printf("\n%-15s %-20s %-15s %-25s %-15s %-10s", "Ma quan ao", "Ten quan ao", "Khuyen mai", "Don gia", "So luong", "Chieu cao cay con");
+            In_Tree_height_size_x(t.root, 10);
+            _getch();
+            break;
+        }
+        case 9:
+        {
+            printf("\n\nSo node quan ao co it nhat 1 con va size 1 con lon hon 10 la: %d", Cout_Quanao_least_1con_size_bigger_x(t.root, 10));
+            _getch();
+            break;
+        }
+        case 10:
+        {
+            int k;
+            printf("\nNhap vao muc k: ");
+            scanf("%d", &k);
+            printf("\n---------- Thong tin quan ao o muc %d ----------\n", k);
+            printf("\n%-15s %-20s %-15s %-25s %-15s %-15s", "Ma quan ao", "Ten quan ao", "Khuyen mai", "Don gia", "So luong", "Size");
+            In_Node_muc_k(t.root, k, 0);
+            _getch();
+            break;
+        }
+        case 11:
+        {
+            int ktra = 0;
+            char ten[20];
+            printf("\nNhap vao ten muon xoa: ");
+            scanf("%s", ten);
+            deleteNode_ten(t.root, ten, ktra);
+            if (ktra == 1)
+                printf("\nDa xoa!");
+            else    
+                printf("\nKhong thuc hien thanh cong");
+            _getch();
+            break;
+        }
+        case 12:
+        {
+            if (t.root == NULL)
+                printf("\nKhong co hang ton");
+            giamGia_Node_soluong_bigger_x(t.root, 30);
+            break;
+        }
+        case 0: return;
+            break;
+        default: 
+        {
+            printf("\nLua chon khong hop le!");
+            _getch();
+            break;
+        }
+        }
+    }
+}
+
+int main()
+{
+    Tree t;
+    Init(t);
+    MENU(t);
+    return 0;
+}
